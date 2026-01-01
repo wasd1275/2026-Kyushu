@@ -3,69 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COCO熊本畢旅</title>
+    <title>COCO熊本畢旅 (雲端同步版)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <style>
-        /* --- 1. 全局設定 --- */
-        :root {
-            --bg-color: #F9F9F7;
-            --card-bg: #FFFFFF;
-            --text-main: #333333;
-            --text-sub: #888888;
-            --radius: 12px;
-            --shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
+        /* --- 保持原本的 CSS 完全不變 --- */
+        :root { --bg-color: #F9F9F7; --card-bg: #FFFFFF; --text-main: #333333; --text-sub: #888888; --radius: 12px; --shadow: 0 4px 10px rgba(0,0,0,0.05); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; select: none; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #eee; margin: 0; padding: 0;
-            display: flex; justify-content: center; color: var(--text-main);
-        }
-
-        #app {
-            width: 100%; max-width: 480px; min-height: 100vh;
-            background: var(--bg-color); position: relative; padding-bottom: 80px;
-        }
-
-        /* --- 2. Header --- */
-        header {
-            background: rgba(255,255,255,0.95); padding: 15px 20px;
-            position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-            display: flex; align-items: center; justify-content: space-between; height: 60px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #eee; margin: 0; padding: 0; display: flex; justify-content: center; color: var(--text-main); }
+        #app { width: 100%; max-width: 480px; min-height: 100vh; background: var(--bg-color); position: relative; padding-bottom: 80px; }
+        header { background: rgba(255,255,255,0.95); padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; height: 60px; }
         h1 { margin: 0; font-size: 18px; font-weight: bold; }
         .back-btn { font-size: 20px; color: var(--text-main); cursor: pointer; border: none; background: none; display: none; }
-
-        /* --- 3. Dashboard --- */
         #view-dashboard { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; animation: fadeIn 0.3s; }
-        .day-block {
-            background: var(--card-bg); padding: 15px 10px; border-radius: var(--radius);
-            box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; position: relative;
-        }
+        .day-block { background: var(--card-bg); padding: 15px 10px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; position: relative; }
         .day-block:active { transform: scale(0.95); }
         .day-num { font-size: 12px; color: var(--text-sub); font-weight: bold; }
         .day-date { font-size: 16px; font-weight: bold; margin: 4px 0; color: #333; }
         .day-loc { font-size: 12px; color: #666; margin-bottom: 6px; }
-        .day-weather {
-            display: inline-block; background: #F0F8FF; color: #56CCF2;
-            padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; border: 1px solid #E0F0FF;
-        }
-
-        /* --- 4. Detail View --- */
+        .day-weather { display: inline-block; background: #F0F8FF; color: #56CCF2; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; border: 1px solid #E0F0FF; }
         #view-detail { display: none; padding: 15px; animation: slideIn 0.3s; }
-        .card {
-            background: #fff; margin-bottom: 15px; padding: 15px;
-            border-radius: var(--radius); box-shadow: var(--shadow);
-            border-left: 5px solid #ccc; position: relative;
-        }
+        .card { background: #fff; margin-bottom: 15px; padding: 15px; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 5px solid #ccc; position: relative; }
         .type-spot { border-left-color: #F2C94C; } .type-food { border-left-color: #EB5757; }
         .type-transport { border-left-color: #56CCF2; background: #F0FAFF; } .type-stay { border-left-color: #6FCF97; }
-
         .card-row { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-time { font-size: 14px; font-weight: bold; color: #555; width: 50px; }
         .card-content { flex: 1; }
@@ -75,24 +36,13 @@
         .action-btns { display: flex; gap: 8px; margin-left: 10px; align-items: flex-start;}
         .icon-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #eee; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; }
         .btn-link { color: #27AE60; border-color: #D5F5E3; background: #EAFAF1; }
-
-        /* --- 5. Tool Styles --- */
         #view-tools { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .tool-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .tool-block {
-            background: #fff; padding: 25px 15px; border-radius: 16px; box-shadow: var(--shadow);
-            text-align: center; cursor: pointer; transition: transform 0.1s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-        }
+        .tool-block { background: #fff; padding: 25px 15px; border-radius: 16px; box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
         .tool-block:active { transform: scale(0.96); }
-        .tool-icon-box {
-            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; margin-bottom: 5px;
-        }
+        .tool-icon-box { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; }
         .tool-title { font-weight: bold; color: #333; font-size: 15px; }
         .tool-subview { display: none; animation: slideIn 0.3s; }
-
-        /* Flight & Train Styles */
         .flight-card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; border-left: 6px solid #56CCF2; cursor: pointer; }
         .flight-number { font-size: 28px; font-weight: 800; color: #333; margin: 5px 0; }
         .flight-route { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: bold; color: #555; }
@@ -103,83 +53,31 @@
         .seat-card { background: #fff; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; overflow: hidden; }
         .seat-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
         .seat-info { padding: 15px; }
-        .seat-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
-
-        /* --- 6. Budget Notebook --- */
         .budget-person-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .budget-person-card {
-            background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--shadow);
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-        }
-        .avatar-circle {
-            width: 40px; height: 40px; background: #333; color: #fff; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;
-        }
-        
-        #budget-notebook {
-            background-color: #fff;
-            background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
-            background-size: 100% 50px; 
-            min-height: 80vh;
-            padding-bottom: 80px;
-            position: relative;
-        }
-        .notebook-header {
-            background: #f8f8f8; padding: 10px 15px; border-bottom: 2px solid #ccc;
-            font-size: 12px; font-weight: bold; color: #888; display: flex;
-        }
-        .nb-row {
-            height: 50px; display: flex; align-items: center; padding: 0 15px;
-            font-size: 15px; color: #333; user-select: none; -webkit-user-select: none;
-        }
+        .budget-person-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .avatar-circle { width: 40px; height: 40px; background: #333; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        #budget-notebook { background-color: #fff; background-image: linear-gradient(#e1e1e1 1px, transparent 1px); background-size: 100% 50px;  min-height: 80vh; padding-bottom: 80px; position: relative; }
+        .notebook-header { background: #f8f8f8; padding: 10px 15px; border-bottom: 2px solid #ccc; font-size: 12px; font-weight: bold; color: #888; display: flex; }
+        .nb-row { height: 50px; display: flex; align-items: center; padding: 0 15px; font-size: 15px; color: #333; user-select: none; -webkit-user-select: none; }
         .nb-row:active { background-color: rgba(0,0,0,0.05); }
-        
         .col-date { width: 50px; font-size: 13px; color: #888; }
         .col-type { width: 40px; font-size: 18px; text-align: center; margin-right: 10px;}
         .col-content { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
         .col-cost { width: 80px; text-align: right; font-weight: bold; color: #B07C3D; font-family: monospace; font-size: 16px;}
-        
-        .budget-total-bar {
-            position: fixed; bottom: 60px; left: 0; width: 100%;
-            background: #333; color: #fff; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 90;
-        }
-        
-        /* FAB */
-        .fab {
-            position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px;
-            background: #333; color: #fff; border-radius: 50%; display: none;
-            align-items: center; justify-content: center; font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 150;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none;
-            justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(3px);
-        }
-        .modal-box {
-            background: #fff; width: 85%; max-width: 400px; padding: 20px;
-            border-radius: 12px; animation: popUp 0.2s;
-        }
+        .budget-total-bar { position: fixed; bottom: 60px; left: 0; width: 100%; background: #333; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 90; }
+        .fab { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; background: #333; color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 150; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(3px); }
+        .modal-box { background: #fff; width: 85%; max-width: 400px; padding: 20px; border-radius: 12px; animation: popUp 0.2s; }
         .form-group { margin-bottom: 12px; }
         .form-input, .form-select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background:#fff;}
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-save { background: #333; color: #fff; }
         .btn-del { background: #fff; border: 1px solid #EB5757; color: #EB5757; }
-
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; max-width: 480px;
-            background: #fff; border-top: 1px solid #eee;
-            display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
-        }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
         .nav-item { text-align: center; color: #ccc; font-size: 10px; cursor: pointer; }
         .nav-item.active { color: #333; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes popUp { from { transform: scale(0.9); } to { transform: scale(1); } }
@@ -283,9 +181,29 @@
     </div>
 </div>
 
-<script>
-    // --- Data ---
-    // Updated with complete itinerary from PDF
+<script type="module">
+    // --- 1. Firebase 設定與初始化 ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 🔴 請在這裡填入你的 Firebase 設定 (從 Firebase Console -> Project Settings -> General -> Your apps 複製)
+    
+    const firebaseConfig = {
+        apiKey: "請填入你的API_KEY",
+        authDomain: "你的專案ID.firebaseapp.com",
+        projectId: "你的專案ID",
+        storageBucket: "你的專案ID.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
+
+    // 初始化 Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    // 我們將所有資料存在 "trips" 集合下的 "coco_kumamoto" 文件中
+    const docRef = doc(db, "trips", "coco_kumamoto");
+
+    // --- 2. 原始資料結構 ---
     const defaultTrip = [
         { date: "Day 1", fullDate: "1/19 (日)", loc: "抵達熊本", weather: "☁️ 7°C", events: [
             { time: "14:30", type: "transport", title: "飛機出發 (CI194)", cost: "", desc: "17:30 抵達熊本機場" },
@@ -354,9 +272,9 @@
              { time: "18:30", type: "transport", title: "飛機回程 (CI195)", cost: "", desc: "20:05 抵達台北" }
         ]}
     ];
-
     const defaultBudget = { "王志真": [], "王士晉": [], "江竑緯": [], "胡朝昱": [], "任翔": [] };
 
+    // --- 3. 全局變數 ---
     let tripData = [];
     let budgetData = {};
     let currentDayIdx = null;
@@ -366,18 +284,56 @@
     let currentBudgetPerson = null;
     let editingBudgetIdx = null;
 
+    // --- 4. 核心邏輯修改：使用 Firebase ---
+    
+    // 初始化：監聽雲端資料
     function init() {
-        const storedTrip = localStorage.getItem('trip_coco_v10');
-        tripData = storedTrip ? JSON.parse(storedTrip) : JSON.parse(JSON.stringify(defaultTrip));
-        const storedBudget = localStorage.getItem('budget_coco_v10');
-        budgetData = storedBudget ? JSON.parse(storedBudget) : JSON.parse(JSON.stringify(defaultBudget));
-        renderDashboard();
+        console.log("正在連接 Firebase...");
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                // 雲端有資料，下載並更新畫面
+                const cloudData = docSnap.data();
+                tripData = cloudData.tripData || [];
+                budgetData = cloudData.budgetData || {};
+                console.log("雲端資料同步成功");
+                
+                // 根據當前頁面刷新 UI
+                if(currentView === 'dashboard') renderDashboard();
+                else if(currentView === 'detail') renderEvents();
+                else if(currentView === 'budget-detail') renderBudgetList();
+            } else {
+                // 雲端沒資料（第一次使用），把預設資料上傳
+                console.log("初始化新資料庫...");
+                tripData = JSON.parse(JSON.stringify(defaultTrip));
+                budgetData = JSON.parse(JSON.stringify(defaultBudget));
+                saveToCloud(); // 存上去
+                renderDashboard();
+            }
+        });
     }
-    function saveData() { localStorage.setItem('trip_coco_v10', JSON.stringify(tripData)); }
-    function saveBudget() { localStorage.setItem('budget_coco_v10', JSON.stringify(budgetData)); }
 
-    // --- Navigation ---
-    function switchTab(tab) {
+    // 統一的儲存函數：上傳到雲端
+    async function saveToCloud() {
+        try {
+            await setDoc(docRef, {
+                tripData: tripData,
+                budgetData: budgetData
+            }, { merge: true });
+            console.log("儲存成功");
+        } catch (e) {
+            console.error("儲存失敗: ", e);
+            alert("儲存失敗，請檢查網路或權限設定");
+        }
+    }
+
+    // 取代舊的 saveData / saveBudget
+    window.saveData = saveToCloud;
+    window.saveBudget = saveToCloud;
+
+    // --- 5. UI 邏輯 (大部分保持不變，但需掛載到 window) ---
+    // 因為 type="module" 會讓函數變為區域變數，HTML onclick 會抓不到，所以要手動綁定到 window
+
+    window.switchTab = function(tab) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('view-dashboard').style.display = 'none';
         document.getElementById('view-detail').style.display = 'none';
@@ -392,6 +348,7 @@
             document.getElementById('page-title').innerText = "COCO熊本畢旅";
             document.getElementById('view-dashboard').style.display = 'grid';
             currentView = 'dashboard';
+            renderDashboard(); // 確保切回來時重新渲染
         } else {
             document.querySelector('.nav-item:nth-child(2)').classList.add('active');
             document.getElementById('view-tools').style.display = 'block';
@@ -403,7 +360,7 @@
         }
     }
 
-    function handleBack() {
+    window.handleBack = function() {
         if(navHistory.length > 0) {
             const prevState = navHistory.pop();
             if(prevState === 'tools') {
@@ -420,14 +377,14 @@
             } else if (prevState === 'budget-menu') {
                 openBudgetMenu();
             } else if (prevState === 'dashboard') {
-                switchTab('home');
+                window.switchTab('home'); // 回首頁
             }
         } else {
-            switchTab('home');
+            window.switchTab('home');
         }
     }
 
-    // --- Dashboard & Detail ---
+    // --- Views Rendering ---
     function renderDashboard() {
         const box = document.getElementById('view-dashboard');
         let html = '';
@@ -437,7 +394,7 @@
         box.innerHTML = html;
     }
 
-    function openDay(idx) {
+    window.openDay = function(idx) {
         currentDayIdx = idx;
         navHistory.push('dashboard');
         currentView = 'detail';
@@ -465,12 +422,13 @@
         list.innerHTML = html;
         new Sortable(list, { animation: 150, delay: 200, ghostClass: 'sortable-ghost', onEnd: function (evt) {
             const movedItem = tripData[currentDayIdx].events.splice(evt.oldIndex, 1)[0];
-            tripData[currentDayIdx].events.splice(evt.newIndex, 0, movedItem); saveData();
+            tripData[currentDayIdx].events.splice(evt.newIndex, 0, movedItem); 
+            saveToCloud();
         }});
     }
 
-    // --- Tools Logic ---
-    function openToolSub(type) {
+    // --- Tools ---
+    window.openToolSub = function(type) {
         const menu = document.getElementById('tools-menu');
         const content = document.getElementById('tool-content');
         menu.style.display = 'none'; content.style.display = 'block'; content.innerHTML = ''; 
@@ -487,13 +445,12 @@
         }
     }
 
-    function openTrainDetail(subType) {
+    window.openTrainDetail = function(subType) {
         const content = document.getElementById('tool-content');
         navHistory.push('train-menu');
         if(subType === 'seats') {
             document.getElementById('page-title').innerText = "電車自由座";
-            // Updated based on PDF information
-            const trains = [
+             const trains = [
                 {name: "九州新幹線 (瑞穗/櫻/燕)", cars: "1-3 號車", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Shinkansen_N700-7000_S1_%2849766090102%29.jpg/640px-Shinkansen_N700-7000_S1_%2849766090102%29.jpg"},
                 {name: "特急 Sonic (音速號)", cars: "883系: 4-7 / 885系: 4-6", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Kyushu_Railway_-_Series_883_-_01.JPG/640px-Kyushu_Railway_-_Series_883_-_01.JPG"},
                 {name: "特急 接力海鷗 (Relay Kamome)", cars: "4-6 號車", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/JRK_787_Bm12_Relay_Kamome_20220924.jpg/640px-JRK_787_Bm12_Relay_Kamome_20220924.jpg"},
@@ -515,7 +472,6 @@
             ];
             let html = '';
             stations.forEach(s => {
-                // Removed the text "點擊開啟時刻表"
                 html += `<div class="link-item" onclick="window.open('${s.url}', '_blank')"><div class="link-icon"><i class="fas fa-train"></i></div><div class="link-info"><div class="link-name">${s.name}</div></div><i class="fas fa-chevron-right" style="color:#ccc;"></i></div>`;
             });
             content.innerHTML = html;
@@ -523,7 +479,7 @@
     }
 
     // --- Budget Logic ---
-    function openBudgetMenu() {
+    window.openBudgetMenu = function() {
         document.getElementById('tools-menu').style.display = 'none';
         document.getElementById('tool-content').style.display = 'block';
         document.getElementById('budget-notebook').style.display = 'none';
@@ -545,7 +501,7 @@
         document.getElementById('tool-content').innerHTML = html;
     }
 
-    function openPersonalBudget(name) {
+    window.openPersonalBudget = function(name) {
         currentBudgetPerson = name;
         document.getElementById('tool-content').style.display = 'none';
         document.getElementById('budget-notebook').style.display = 'block';
@@ -573,12 +529,12 @@
     }
 
     // --- Handling Input ---
-    function handleAddClick() {
+    window.handleAddClick = function() {
         if(currentView === 'detail') openItineraryModal(null);
         else if(currentView === 'budget-detail') openBudgetModal(null);
     }
 
-    function openItineraryModal(idx) {
+    window.openItineraryModal = function(idx) {
         const modal = document.getElementById('itinerary-modal');
         editEventIdx = idx;
         const inputs = modal.querySelectorAll('input, select, textarea');
@@ -595,8 +551,9 @@
         }
         modal.style.display = 'flex';
     }
-    function closeItineraryModal() { document.getElementById('itinerary-modal').style.display = 'none'; }
-    function saveEvent() {
+    window.closeItineraryModal = () => document.getElementById('itinerary-modal').style.display = 'none';
+
+    window.saveEvent = function() {
         const newEvt = {
             time: document.getElementById('inp-time').value, type: document.getElementById('inp-type').value,
             title: document.getElementById('inp-title').value, link: document.getElementById('inp-link').value,
@@ -605,11 +562,16 @@
         };
         if (editEventIdx === null) { tripData[currentDayIdx].events.push(newEvt); } 
         else { tripData[currentDayIdx].events[editEventIdx] = newEvt; }
-        saveData(); renderEvents(); closeItineraryModal();
+        saveToCloud(); renderEvents(); closeItineraryModal();
     }
-    function deleteEvent() { if (confirm("確定刪除嗎？")) { tripData[currentDayIdx].events.splice(editEventIdx, 1); saveData(); renderEvents(); closeItineraryModal(); }}
+    window.deleteEvent = function() { 
+        if (confirm("確定刪除嗎？")) { 
+            tripData[currentDayIdx].events.splice(editEventIdx, 1); 
+            saveToCloud(); renderEvents(); closeItineraryModal(); 
+        }
+    }
 
-    function openBudgetModal(idx) {
+    window.openBudgetModal = function(idx) {
         const modal = document.getElementById('budget-modal');
         editingBudgetIdx = idx;
         if (idx === null) {
@@ -626,8 +588,9 @@
         }
         modal.style.display = 'flex';
     }
-    function closeBudgetModal() { document.getElementById('budget-modal').style.display = 'none'; }
-    function saveBudgetItem() {
+    window.closeBudgetModal = () => document.getElementById('budget-modal').style.display = 'none';
+
+    window.saveBudgetItem = function() {
         const newItem = {
             date: document.getElementById('b-date').value, type: document.getElementById('b-type').value,
             title: document.getElementById('b-title').value, cost: document.getElementById('b-cost').value
@@ -635,16 +598,18 @@
         if(!budgetData[currentBudgetPerson]) budgetData[currentBudgetPerson] = [];
         if(editingBudgetIdx === null) { budgetData[currentBudgetPerson].push(newItem); } 
         else { budgetData[currentBudgetPerson][editingBudgetIdx] = newItem; }
-        saveBudget(); renderBudgetList(); closeBudgetModal();
+        saveToCloud(); renderBudgetList(); closeBudgetModal();
     }
-    function deleteBudgetItem() {
+    window.deleteBudgetItem = function() {
         if(confirm("確定刪除此筆記帳？")) {
             budgetData[currentBudgetPerson].splice(editingBudgetIdx, 1);
-            saveBudget(); renderBudgetList(); closeBudgetModal();
+            saveToCloud(); renderBudgetList(); closeBudgetModal();
         }
     }
 
+    // 啟動 App
     init();
+
 </script>
 </body>
 </html>
