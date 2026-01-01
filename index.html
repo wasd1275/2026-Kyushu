@@ -1,1 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COCO熊本畢旅</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
+    <style>
+        /* --- 1. 全局設定 --- */
+        :root {
+            --bg-color: #F9F9F7;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-sub: #888888;
+            --radius: 12px;
+            --shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; select: none; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #eee; margin: 0; padding: 0;
+            display: flex; justify-content: center; color: var(--text-main);
+        }
+
+        #app {
+            width: 100%; max-width: 480px; min-height: 100vh;
+            background: var(--bg-color); position: relative; padding-bottom: 80px;
+        }
+
+        /* --- 2. Header --- */
+        header {
+            background: rgba(255,255,255,0.95); padding: 15px 20px;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+            display: flex; align-items: center; justify-content: space-between; height: 60px;
+        }
+        h1 { margin: 0; font-size: 18px; font-weight: bold; }
+        .back-btn { font-size: 20px; color: var(--text-main); cursor: pointer; border: none; background: none; display: none; }
+
+        /* --- 3. Dashboard --- */
+        #view-dashboard { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; animation: fadeIn 0.3s; }
+        .day-block {
+            background: var(--card-bg); padding: 15px 10px; border-radius: var(--radius);
+            box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; position: relative;
+        }
+        .day-block:active { transform: scale(0.95); }
+        .day-num { font-size: 12px; color: var(--text-sub); font-weight: bold; }
+        .day-date { font-size: 16px; font-weight: bold; margin: 4px 0; color: #333; }
+        .day-loc { font-size: 12px; color: #666; margin-bottom: 6px; }
+        .day-weather {
+            display: inline-block; background: #F0F8FF; color: #56CCF2;
+            padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; border: 1px solid #E0F0FF;
+        }
+
+        /* --- 4. Detail View --- */
+        #view-detail { display: none; padding: 15px; animation: slideIn 0.3s; }
+        .card {
+            background: #fff; margin-bottom: 15px; padding: 15px;
+            border-radius: var(--radius); box-shadow: var(--shadow);
+            border-left: 5px solid #ccc; position: relative;
+        }
+        .type-spot { border-left-color: #F2C94C; } .type-food { border-left-color: #EB5757; }
+        .type-transport { border-left-color: #56CCF2; background: #F0FAFF; } .type-stay { border-left-color: #6FCF97; }
+
+        .card-row { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-time { font-size: 14px; font-weight: bold; color: #555; width: 50px; }
+        .card-content { flex: 1; }
+        .card-title { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+        .card-cost { display: inline-block; background: #FFF9E6; color: #B07C3D; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px;}
+        .card-desc { font-size: 13px; color: #666; line-height: 1.5; white-space: pre-line; }
+        .action-btns { display: flex; gap: 8px; margin-left: 10px; align-items: flex-start;}
+        .icon-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #eee; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; }
+        .btn-link { color: #27AE60; border-color: #D5F5E3; background: #EAFAF1; }
+
+        /* --- 5. Tool Styles --- */
+        #view-tools { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tool-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .tool-block {
+            background: #fff; padding: 25px 15px; border-radius: 16px; box-shadow: var(--shadow);
+            text-align: center; cursor: pointer; transition: transform 0.1s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+        }
+        .tool-block:active { transform: scale(0.96); }
+        .tool-icon-box {
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 5px;
+        }
+        .tool-title { font-weight: bold; color: #333; font-size: 15px; }
+        .tool-subview { display: none; animation: slideIn 0.3s; }
+
+        /* Flight & Train Styles */
+        .flight-card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; border-left: 6px solid #56CCF2; cursor: pointer; }
+        .flight-number { font-size: 28px; font-weight: 800; color: #333; margin: 5px 0; }
+        .flight-route { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: bold; color: #555; }
+        .link-item { background: #fff; padding: 15px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .link-icon { width: 40px; height: 40px; background: #F0FAFF; color: #56CCF2; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .train-menu { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .train-block { background: #F0FFF4; border: 1px solid #6FCF97; color: #27AE60; padding: 30px; border-radius: 16px; text-align: center; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: var(--shadow); }
+        .seat-card { background: #fff; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; overflow: hidden; }
+        .seat-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
+        .seat-info { padding: 15px; }
+        .seat-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+
+        /* --- 6. Budget Notebook --- */
+        .budget-person-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .budget-person-card {
+            background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--shadow);
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
+        }
+        .avatar-circle {
+            width: 40px; height: 40px; background: #333; color: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;
+        }
+        
+        #budget-notebook {
+            background-color: #fff;
+            background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
+            background-size: 100% 50px; 
+            min-height: 80vh;
+            padding-bottom: 80px;
+            position: relative;
+        }
+        .notebook-header {
+            background: #f8f8f8; padding: 10px 15px; border-bottom: 2px solid #ccc;
+            font-size: 12px; font-weight: bold; color: #888; display: flex;
+        }
+        .nb-row {
+            height: 50px; display: flex; align-items: center; padding: 0 15px;
+            font-size: 15px; color: #333; user-select: none; -webkit-user-select: none;
+        }
+        .nb-row:active { background-color: rgba(0,0,0,0.05); }
+        
+        .col-date { width: 50px; font-size: 13px; color: #888; }
+        .col-type { width: 40px; font-size: 18px; text-align: center; margin-right: 10px;}
+        .col-content { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
+        .col-cost { width: 80px; text-align: right; font-weight: bold; color: #B07C3D; font-family: monospace; font-size: 16px;}
+        
+        .budget-total-bar {
+            position: fixed; bottom: 60px; left: 0; width: 100%;
+            background: #333; color: #fff; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 90;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px;
+            background: #333; color: #fff; border-radius: 50%; display: none;
+            align-items: center; justify-content: center; font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 150;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(3px);
+        }
+        .modal-box {
+            background: #fff; width: 85%; max-width: 400px; padding: 20px;
+            border-radius: 12px; animation: popUp 0.2s;
+        }
+        .form-group { margin-bottom: 12px; }
+        .form-input, .form-select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background:#fff;}
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-save { background: #333; color: #fff; }
+        .btn-del { background: #fff; border: 1px solid #EB5757; color: #EB5757; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 480px;
+            background: #fff; border-top: 1px solid #eee;
+            display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
+        }
+        .nav-item { text-align: center; color: #ccc; font-size: 10px; cursor: pointer; }
+        .nav-item.active { color: #333; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes popUp { from { transform: scale(0.9); } to { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <button class="back-btn" onclick="handleBack()"><i class="fas fa-arrow-left"></i></button>
+        <h1 id="page-title">COCO熊本畢旅</h1>
+        <div style="width: 20px;"></div>
+    </header>
+
+    <div id="view-dashboard"></div>
+
+    <div id="view-detail">
+        <div id="event-list"></div>
+        <div style="height: 60px;"></div>
+    </div>
+
+    <div id="view-tools">
+        <div id="tools-menu" class="tool-menu">
+            <div class="tool-block" onclick="window.open('https://tenki.jp/', '_blank')">
+                <div class="tool-icon-box" style="background:#FFF5F5; color:#EB5757;"><i class="fas fa-sun"></i></div>
+                <div class="tool-title">天氣預報</div>
+            </div>
+            <div class="tool-block" onclick="openToolSub('flight')">
+                <div class="tool-icon-box" style="background:#F0FAFF; color:#56CCF2;"><i class="fas fa-plane"></i></div>
+                <div class="tool-title">航班資訊</div>
+            </div>
+            <div class="tool-block" onclick="openToolSub('train')">
+                <div class="tool-icon-box" style="background:#F0FFF4; color:#6FCF97;"><i class="fas fa-train"></i></div>
+                <div class="tool-title">電車與時間表</div>
+            </div>
+            <div class="tool-block" onclick="openBudgetMenu()">
+                <div class="tool-icon-box" style="background:#FFF9E6; color:#B07C3D;"><i class="fas fa-wallet"></i></div>
+                <div class="tool-title">記帳本</div>
+            </div>
+        </div>
+        <div id="tool-content" class="tool-subview"></div>
+        <div id="budget-notebook" class="tool-subview" style="display:none;"></div>
+    </div>
+
+    <div class="fab" id="fab-add" onclick="handleAddClick()">
+        <i class="fas fa-plus"></i>
+    </div>
+    
+    <div id="budget-total-bar" class="budget-total-bar" style="display:none;">
+        <div>總計</div>
+        <div style="text-align:right;">
+            <div id="total-val">¥0</div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home')"><i class="fas fa-map-marked-alt"></i> 行程</div>
+        <div class="nav-item" onclick="switchTab('tools')"><i class="fas fa-suitcase"></i> 工具</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="budget-modal">
+    <div class="modal-box">
+        <h3 id="budget-modal-title">新增支出</h3>
+        <div class="form-group"><label class="form-label">日期</label><input type="text" id="b-date" class="form-input" placeholder="1/19"></div>
+        <div class="form-group"><label class="form-label">種類</label>
+            <select id="b-type" class="form-select">
+                <option value="food">🍜 吃</option>
+                <option value="transport">🚅 交通</option>
+                <option value="spot">🎫 景點</option>
+                <option value="stay">🏨 住宿</option>
+                <option value="other">🛍️ 其他</option>
+            </select>
+        </div>
+        <div class="form-group"><label class="form-label">內容</label><input type="text" id="b-title" class="form-input" placeholder="項目名稱"></div>
+        <div class="form-group"><label class="form-label">金額</label><input type="number" id="b-cost" class="form-input" placeholder="1000"></div>
+        
+        <div class="btn-group">
+            <button class="btn btn-del" id="b-btn-delete" style="display:none;" onclick="deleteBudgetItem()">刪除</button>
+            <button class="btn" style="background:#eee;" onclick="closeBudgetModal()">取消</button>
+            <button class="btn btn-save" onclick="saveBudgetItem()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="itinerary-modal">
+    <div class="modal-box">
+        <h3 id="modal-title">編輯行程</h3>
+        <div class="form-group"><label class="form-label">時間</label><input type="text" id="inp-time" class="form-input"></div>
+        <div class="form-group"><label class="form-label">類型</label><select id="inp-type" class="form-select"><option value="spot">📍 景點</option><option value="food">🍜 美食</option><option value="transport">🚅 交通</option><option value="stay">🏨 住宿</option></select></div>
+        <div class="form-group"><label class="form-label">標題</label><input type="text" id="inp-title" class="form-input"></div>
+        <div class="form-group"><label class="form-label">連結</label><input type="text" id="inp-link" class="form-input"></div>
+        <div class="form-group"><label class="form-label">地圖</label><input type="text" id="inp-map" class="form-input"></div>
+        <div class="form-group"><label class="form-label">費用</label><input type="text" id="inp-cost" class="form-input"></div>
+        <div class="form-group"><label class="form-label">備註</label><textarea id="inp-desc" class="form-input" rows="3"></textarea></div>
+        <div class="btn-group">
+            <button class="btn btn-del" id="btn-delete" onclick="deleteEvent()">刪除</button>
+            <button class="btn" style="background:#eee;" onclick="closeItineraryModal()">取消</button>
+            <button class="btn btn-save" onclick="saveEvent()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data ---
+    // Updated with complete itinerary from PDF
+    const defaultTrip = [
+        { date: "Day 1", fullDate: "1/19 (日)", loc: "抵達熊本", weather: "☁️ 7°C", events: [
+            { time: "14:30", type: "transport", title: "飛機出發 (CI194)", cost: "", desc: "17:30 抵達熊本機場" },
+            { time: "18:00", type: "transport", title: "機場巴士", cost: "¥1200", link: "https://www.sankobus.jp/bus/airport/", desc: "前往熊本櫻町巴士總站 (19:00抵達)" },
+            { time: "19:30", type: "food", title: "勝烈亭 豬排", cost: "¥2500", desc: "熊本名店，就在商店街附近" },
+            { time: "21:00", type: "spot", title: "熊本城 櫻之馬場", cost: "", desc: "就在櫻町旁邊，看夜景" },
+            { time: "住宿", type: "stay", title: "SUPER HOTEL Kumamoto", cost: "¥3310", link: "https://www.superhotel.co.jp/", desc: "熊本車站正對面，含溫泉與早餐" }
+        ]},
+        { date: "Day 2", fullDate: "1/20 (一)", loc: "別府", weather: "⛅ 8°C", events: [
+            { time: "10:03", type: "transport", title: "九州新幹線", cost: "", desc: "熊本 -> 博多 -> 別府 (約3小時)" },
+            { time: "13:00", type: "food", title: "別府冷麵 / 天丼", cost: "¥1500", desc: "車站附近午餐" },
+            { time: "14:30", type: "spot", title: "別府地獄巡禮", cost: "¥2000", link: "http://www.beppu-jigoku.com/", desc: "海地獄、血池地獄等 (使用巴士一日券)" },
+            { time: "17:00", type: "spot", title: "葫蘆溫泉 (Hyotan Onsen)", cost: "¥860", link: "https://www.hyotan-onsen.com/", desc: "米其林三星溫泉，砂湯體驗" },
+            { time: "19:00", type: "spot", title: "湯煙展望台", cost: "", desc: "看別府夜景與湯煙" },
+            { time: "住宿", type: "stay", title: "GRAND BASE Beppueki", cost: "¥3800", desc: "別府車站附近" }
+        ]},
+        { date: "Day 3", fullDate: "1/21 (二)", loc: "福岡博多", weather: "☀️ 9°C", events: [
+            { time: "10:00", type: "transport", title: "Sonic 音速號", cost: "", desc: "別府 -> 博多 (約2小時)" },
+            { time: "12:30", type: "spot", title: "住吉神社", cost: "", desc: "博多最古老神社" },
+            { time: "14:00", type: "spot", title: "櫛田神社", cost: "", desc: "博多總鎮守，看山笠" },
+            { time: "16:00", type: "spot", title: "天神地下街", cost: "", desc: "逛街購物" },
+            { time: "18:00", type: "food", title: "博多牛腸鍋", cost: "¥3000", desc: "福岡必吃美食" },
+            { time: "20:00", type: "spot", title: "博多運河城", cost: "", desc: "看水舞秀" },
+            { time: "住宿", type: "stay", title: "alfacio riverside stay hakata", cost: "¥2400", desc: "中洲川端附近" }
+        ]},
+        { date: "Day 4", fullDate: "1/22 (三)", loc: "長崎一日遊", weather: "🌧️ 6°C", events: [
+            { time: "09:00", type: "transport", title: "接力海鷗號 + 新幹線", cost: "", desc: "博多 -> 武雄溫泉 -> 長崎 (約1.5小時)" },
+            { time: "11:00", type: "spot", title: "出島 Dejima", cost: "¥520", desc: "荷蘭商館遺跡" },
+            { time: "12:30", type: "food", title: "長崎什錦麵 / 角煮", cost: "¥1200", desc: "中華街附近" },
+            { time: "14:00", type: "spot", title: "哥拉巴園 & 大浦天主堂", cost: "¥620", desc: "蝴蝶夫人故居" },
+            { time: "16:00", type: "spot", title: "原爆資料館 & 平和公園", cost: "¥200", desc: "歷史巡禮" },
+            { time: "17:30", type: "spot", title: "山王神社 二之鳥居", cost: "", desc: "單腳鳥居" },
+            { time: "19:00", type: "spot", title: "稻佐山夜景", cost: "¥1250", link: "https://www.inasayama.com/", desc: "世界新三大夜景 (纜車)" },
+            { time: "21:30", type: "transport", title: "返回博多", cost: "", desc: "搭乘末班新幹線回福岡" }
+        ]},
+        { date: "Day 5", fullDate: "1/23 (四)", loc: "福岡自由", weather: "☁️ 8°C", events: [
+            { time: "10:00", type: "spot", title: "太宰府天滿宮", cost: "", desc: "求學業，吃梅枝餅" },
+            { time: "14:00", type: "spot", title: "柳川遊船 (選配)", cost: "¥1500", desc: "水都柳川，吃鰻魚飯" },
+            { time: "17:00", type: "spot", title: "福岡塔 / 巨蛋", cost: "¥800", desc: "海濱百道區域" },
+            { time: "19:30", type: "food", title: "博多屋台", cost: "¥2000", desc: "中洲/天神屋台體驗" },
+            { time: "住宿", type: "stay", title: "alfacio riverside stay hakata", cost: "¥2400", desc: "續住" }
+        ]},
+        { date: "Day 6", fullDate: "1/24 (五)", loc: "福岡/熊本", weather: "☀️ 10°C", events: [
+            { time: "11:00", type: "transport", title: "新幹線 -> 熊本", cost: "", desc: "移動日，返回熊本 (約40分)" },
+            { time: "13:00", type: "food", title: "熊本拉麵 (黑亭)", cost: "¥1000", desc: "蒜味焦香拉麵" },
+            { time: "14:30", type: "spot", title: "下通/上通 商店街", cost: "", desc: "購物採買伴手禮" },
+            { time: "16:00", type: "spot", title: "熊本熊部長辦公室", cost: "", link: "https://www.kumamon-sq.jp/", desc: "Kumamon Square (可能有表演)" },
+            { time: "19:00", type: "food", title: "馬肉料理 (選配)", cost: "¥4000", desc: "熊本特色料理" },
+            { time: "住宿", type: "stay", title: "fav KUMAMOTO", cost: "¥4000", link: "https://fav-hotels.com/hotels/kumamoto/", desc: "新型公寓式酒店" }
+        ]},
+        { date: "Day 7", fullDate: "1/25 (六)", loc: "阿蘇自駕", weather: "⛅ 4°C", events: [
+            { time: "09:00", type: "transport", title: "租車自駕出發", cost: "¥2000", desc: "前往阿蘇" },
+            { time: "10:30", type: "spot", title: "草千里之濱", cost: "", link: "https://kumamoto.guide/spots/detail/205", desc: "大草原與烏帽子岳" },
+            { time: "11:30", type: "spot", title: "阿蘇中岳火山口", cost: "¥800", link: "http://www.aso.ne.jp/~volcano/", desc: "視氣體濃度開放" },
+            { time: "13:00", type: "food", title: "阿蘇赤牛丼", cost: "¥1800", desc: "Imakin食堂或周邊" },
+            { time: "14:30", type: "spot", title: "大觀峰", cost: "", desc: "360度阿蘇五岳絕景" },
+            { time: "16:00", type: "spot", title: "上色見熊野座神社", cost: "", desc: "神秘的神社 (視時間)" },
+            { time: "19:00", type: "transport", title: "返回熊本還車", cost: "", desc: "加油並還車" },
+            { time: "住宿", type: "stay", title: "fav KUMAMOTO", cost: "¥4000", desc: "續住" }
+        ]},
+        { date: "Day 8", fullDate: "1/26 (日)", loc: "回程", weather: "☀️ 11°C", events: [
+             { time: "10:00", type: "spot", title: "水前寺成趣園", cost: "¥400", desc: "日式庭園" },
+             { time: "12:00", type: "food", title: "最後午餐", cost: "", desc: "自由選擇" },
+             { time: "15:30", type: "transport", title: "櫻町巴士總站", cost: "", desc: "搭乘機場巴士" },
+             { time: "16:30", type: "transport", title: "抵達熊本機場", cost: "", desc: "辦理登機與免稅店" },
+             { time: "18:30", type: "transport", title: "飛機回程 (CI195)", cost: "", desc: "20:05 抵達台北" }
+        ]}
+    ];
+
+    const defaultBudget = { "王志真": [], "王士晉": [], "江竑緯": [], "胡朝昱": [], "任翔": [] };
+
+    let tripData = [];
+    let budgetData = {};
+    let currentDayIdx = null;
+    let editEventIdx = null;
+    let currentView = 'dashboard'; 
+    let navHistory = []; 
+    let currentBudgetPerson = null;
+    let editingBudgetIdx = null;
+
+    function init() {
+        const storedTrip = localStorage.getItem('trip_coco_v10');
+        tripData = storedTrip ? JSON.parse(storedTrip) : JSON.parse(JSON.stringify(defaultTrip));
+        const storedBudget = localStorage.getItem('budget_coco_v10');
+        budgetData = storedBudget ? JSON.parse(storedBudget) : JSON.parse(JSON.stringify(defaultBudget));
+        renderDashboard();
+    }
+    function saveData() { localStorage.setItem('trip_coco_v10', JSON.stringify(tripData)); }
+    function saveBudget() { localStorage.setItem('budget_coco_v10', JSON.stringify(budgetData)); }
+
+    // --- Navigation ---
+    function switchTab(tab) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-detail').style.display = 'none';
+        document.getElementById('view-tools').style.display = 'none';
+        document.getElementById('fab-add').style.display = 'none';
+        document.querySelector('.back-btn').style.display = 'none';
+        document.getElementById('budget-total-bar').style.display = 'none';
+        navHistory = [];
+
+        if (tab === 'home') {
+            document.querySelector('.nav-item:nth-child(1)').classList.add('active');
+            document.getElementById('page-title').innerText = "COCO熊本畢旅";
+            document.getElementById('view-dashboard').style.display = 'grid';
+            currentView = 'dashboard';
+        } else {
+            document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+            document.getElementById('view-tools').style.display = 'block';
+            document.getElementById('page-title').innerText = "工具箱";
+            document.getElementById('tools-menu').style.display = 'grid';
+            document.getElementById('tool-content').style.display = 'none';
+            document.getElementById('budget-notebook').style.display = 'none';
+            currentView = 'tools';
+        }
+    }
+
+    function handleBack() {
+        if(navHistory.length > 0) {
+            const prevState = navHistory.pop();
+            if(prevState === 'tools') {
+                document.getElementById('tools-menu').style.display = 'grid';
+                document.getElementById('tool-content').style.display = 'none';
+                document.getElementById('budget-notebook').style.display = 'none';
+                document.getElementById('budget-total-bar').style.display = 'none';
+                document.getElementById('fab-add').style.display = 'none';
+                document.querySelector('.back-btn').style.display = 'none';
+                document.getElementById('page-title').innerText = "工具箱";
+                currentView = 'tools';
+            } else if (prevState === 'train-menu') {
+                openToolSub('train');
+            } else if (prevState === 'budget-menu') {
+                openBudgetMenu();
+            } else if (prevState === 'dashboard') {
+                switchTab('home');
+            }
+        } else {
+            switchTab('home');
+        }
+    }
+
+    // --- Dashboard & Detail ---
+    function renderDashboard() {
+        const box = document.getElementById('view-dashboard');
+        let html = '';
+        tripData.forEach((day, idx) => {
+            html += `<div class="day-block" onclick="openDay(${idx})"><div class="day-num">${day.date}</div><div class="day-date">${day.fullDate}</div><div class="day-loc">${day.loc}</div><div class="day-weather">${day.weather}</div></div>`;
+        });
+        box.innerHTML = html;
+    }
+
+    function openDay(idx) {
+        currentDayIdx = idx;
+        navHistory.push('dashboard');
+        currentView = 'detail';
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-detail').style.display = 'block';
+        document.getElementById('fab-add').style.display = 'flex';
+        document.querySelector('.back-btn').style.display = 'block';
+        document.getElementById('page-title').innerText = `${tripData[currentDayIdx].fullDate} - ${tripData[currentDayIdx].loc}`;
+        renderEvents();
+    }
+
+    function renderEvents() {
+        const list = document.getElementById('event-list');
+        const events = tripData[currentDayIdx].events;
+        let html = '';
+        if (events.length === 0) { html = '<div style="text-align:center; padding:40px; color:#aaa;">點擊右下角 + 新增行程</div>'; } 
+        else {
+            events.forEach((evt, idx) => {
+                const mapUrl = evt.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(evt.title + ' 日本')}`;
+                const costHtml = evt.cost ? `<span class="card-cost">💰 ${evt.cost}</span>` : '';
+                const linkHtml = evt.link ? `<div class="icon-btn btn-link" onclick="window.open('${evt.link}', '_blank')"><i class="fas fa-link"></i></div>` : '';
+                html += `<div class="card type-${evt.type}" data-idx="${idx}"><div class="card-row"><div class="card-time">${evt.time}</div><div class="card-content"><div class="card-title">${evt.title}</div>${costHtml}<div class="card-desc">${evt.desc}</div></div><div class="action-btns"><div class="icon-btn" onclick="openItineraryModal(${idx})"><i class="fas fa-pencil-alt"></i></div>${linkHtml}<div class="icon-btn" onclick="window.open('${mapUrl}')"><i class="fas fa-map-marker-alt" style="color:#56CCF2"></i></div></div></div></div>`;
+            });
+        }
+        list.innerHTML = html;
+        new Sortable(list, { animation: 150, delay: 200, ghostClass: 'sortable-ghost', onEnd: function (evt) {
+            const movedItem = tripData[currentDayIdx].events.splice(evt.oldIndex, 1)[0];
+            tripData[currentDayIdx].events.splice(evt.newIndex, 0, movedItem); saveData();
+        }});
+    }
+
+    // --- Tools Logic ---
+    function openToolSub(type) {
+        const menu = document.getElementById('tools-menu');
+        const content = document.getElementById('tool-content');
+        menu.style.display = 'none'; content.style.display = 'block'; content.innerHTML = ''; 
+        document.querySelector('.back-btn').style.display = 'block';
+        if(currentView !== 'tool-sub') navHistory.push('tools');
+        currentView = 'tool-sub';
+
+        if(type === 'flight') {
+            document.getElementById('page-title').innerText = "航班資訊";
+            content.innerHTML = `<div class="flight-card" onclick="window.open('https://www.google.com/search?q=CI0194+flight+status', '_blank')"><div class="flight-label">2025/01/19 (去程)</div><div class="flight-number">CI 0194</div><div class="flight-route"><span>TPE 台北</span><i class="fas fa-plane" style="transform: rotate(90deg); color:#56CCF2;"></i><span>KMJ 熊本</span></div><div class="flight-footer"><span>點擊查看動態</span><span>China Airlines</span></div></div><div class="flight-card" onclick="window.open('https://www.google.com/search?q=CI0195+flight+status', '_blank')"><div class="flight-label">2025/01/26 (回程)</div><div class="flight-number">CI 0195</div><div class="flight-route"><span>KMJ 熊本</span><i class="fas fa-plane" style="transform: rotate(90deg); color:#56CCF2;"></i><span>TPE 台北</span></div><div class="flight-footer"><span>點擊查看動態</span><span>China Airlines</span></div></div>`;
+        } else if(type === 'train') {
+            document.getElementById('page-title').innerText = "電車與時間表";
+            content.innerHTML = `<div class="train-menu"><div class="train-block" onclick="openTrainDetail('seats')"><i class="fas fa-chair"></i> 電車自由座</div><div class="train-block" onclick="openTrainDetail('time')"><i class="fas fa-clock"></i> 時間表</div></div>`;
+        }
+    }
+
+    function openTrainDetail(subType) {
+        const content = document.getElementById('tool-content');
+        navHistory.push('train-menu');
+        if(subType === 'seats') {
+            document.getElementById('page-title').innerText = "電車自由座";
+            // Updated based on PDF information
+            const trains = [
+                {name: "九州新幹線 (瑞穗/櫻/燕)", cars: "1-3 號車", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Shinkansen_N700-7000_S1_%2849766090102%29.jpg/640px-Shinkansen_N700-7000_S1_%2849766090102%29.jpg"},
+                {name: "特急 Sonic (音速號)", cars: "883系: 4-7 / 885系: 4-6", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Kyushu_Railway_-_Series_883_-_01.JPG/640px-Kyushu_Railway_-_Series_883_-_01.JPG"},
+                {name: "特急 接力海鷗 (Relay Kamome)", cars: "4-6 號車", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/JRK_787_Bm12_Relay_Kamome_20220924.jpg/640px-JRK_787_Bm12_Relay_Kamome_20220924.jpg"},
+                {name: "西九州新幹線 (海鷗)", cars: "4-6 號車", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/N700S-Y4_Kamome-29.jpg/640px-N700S-Y4_Kamome-29.jpg"},
+                {name: "特急 由布 (Yufu)", cars: "3 號車", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/JRK_Kiha185_Yufu_20120908.jpg/640px-JRK_Kiha185_Yufu_20120908.jpg"}
+            ];
+            let html = ''; trains.forEach(t => html += `<div class="seat-card"><img src="${t.img}" class="seat-img"><div class="seat-info"><div class="seat-name">${t.name}</div><div style="color:#555">自由席：<span style="background:#27AE60;color:#fff;padding:2px 6px;border-radius:4px;">${t.cars}</span></div></div></div>`);
+            content.innerHTML = html;
+        } else {
+            document.getElementById('page-title').innerText = "JR 時刻表";
+            const stations = [
+                {name: "博多駅", url: "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28283"},
+                {name: "熊本駅", url: "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28626"},
+                {name: "別府駅", url: "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28805"},
+                {name: "長崎駅", url: "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28533"},
+                {name: "小倉駅", url: "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28155"},
+                {name: "武雄温泉駅", url: "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28395"},
+                {name: "其他九州車站", url: "https://www.jrkyushu.co.jp/railway/station/index.html"}
+            ];
+            let html = '';
+            stations.forEach(s => {
+                // Removed the text "點擊開啟時刻表"
+                html += `<div class="link-item" onclick="window.open('${s.url}', '_blank')"><div class="link-icon"><i class="fas fa-train"></i></div><div class="link-info"><div class="link-name">${s.name}</div></div><i class="fas fa-chevron-right" style="color:#ccc;"></i></div>`;
+            });
+            content.innerHTML = html;
+        }
+    }
+
+    // --- Budget Logic ---
+    function openBudgetMenu() {
+        document.getElementById('tools-menu').style.display = 'none';
+        document.getElementById('tool-content').style.display = 'block';
+        document.getElementById('budget-notebook').style.display = 'none';
+        document.getElementById('budget-total-bar').style.display = 'none';
+        document.getElementById('fab-add').style.display = 'none';
+
+        document.querySelector('.back-btn').style.display = 'block';
+        if(currentView !== 'tool-sub') navHistory.push('tools');
+        currentView = 'tool-sub';
+        
+        document.getElementById('page-title').innerText = "記帳本 - 選擇旅伴";
+
+        const people = ["王志真", "王士晉", "江竑緯", "胡朝昱", "任翔"];
+        let html = '<div class="budget-person-grid">';
+        people.forEach(p => {
+            html += `<div class="budget-person-card" onclick="openPersonalBudget('${p}')"><div class="avatar-circle">${p[0]}</div><div style="font-weight:bold; font-size:16px;">${p}</div><i class="fas fa-chevron-right" style="margin-left:auto; color:#ccc;"></i></div>`;
+        });
+        html += '</div>';
+        document.getElementById('tool-content').innerHTML = html;
+    }
+
+    function openPersonalBudget(name) {
+        currentBudgetPerson = name;
+        document.getElementById('tool-content').style.display = 'none';
+        document.getElementById('budget-notebook').style.display = 'block';
+        document.getElementById('budget-total-bar').style.display = 'flex';
+        document.getElementById('fab-add').style.display = 'flex';
+        document.getElementById('page-title').innerText = `${name} 的記帳本`;
+        navHistory.push('budget-menu');
+        currentView = 'budget-detail';
+        renderBudgetList();
+    }
+
+    function renderBudgetList() {
+        const notebook = document.getElementById('budget-notebook');
+        const items = budgetData[currentBudgetPerson] || [];
+        let total = 0;
+        let html = `<div class="notebook-header"><div style="width:50px;">日期</div><div style="width:40px;">種類</div><div style="flex:1;">內容</div><div style="width:80px; text-align:right;">金額</div></div>`;
+        items.forEach((item, idx) => {
+            total += parseInt(item.cost) || 0;
+            let icon = item.type=='food'?'🍜':item.type=='transport'?'🚅':item.type=='spot'?'🎫':item.type=='stay'?'🏨':'🛍️';
+            html += `<div class="nb-row" oncontextmenu="openBudgetModal(${idx}); return false;" onclick="openBudgetModal(${idx})"><div class="col-date">${item.date}</div><div class="col-type">${icon}</div><div class="col-content">${item.title}</div><div class="col-cost">${item.cost}</div></div>`;
+        });
+        if(items.length === 0) html += `<div style="text-align:center; padding:30px; color:#999; font-size:13px;">點擊 + 新增</div>`;
+        notebook.innerHTML = html;
+        document.getElementById('total-val').innerText = `¥${total}`;
+    }
+
+    // --- Handling Input ---
+    function handleAddClick() {
+        if(currentView === 'detail') openItineraryModal(null);
+        else if(currentView === 'budget-detail') openBudgetModal(null);
+    }
+
+    function openItineraryModal(idx) {
+        const modal = document.getElementById('itinerary-modal');
+        editEventIdx = idx;
+        const inputs = modal.querySelectorAll('input, select, textarea');
+        if (idx === null) {
+            inputs.forEach(i => i.value = ""); document.getElementById('inp-type').value = 'spot';
+            modal.querySelector('#btn-delete').style.display = 'none';
+        } else {
+            const evt = tripData[currentDayIdx].events[idx];
+            document.getElementById('inp-time').value = evt.time; document.getElementById('inp-type').value = evt.type;
+            document.getElementById('inp-title').value = evt.title; document.getElementById('inp-link').value = evt.link||"";
+            document.getElementById('inp-map').value = evt.mapUrl||""; document.getElementById('inp-cost').value = evt.cost;
+            document.getElementById('inp-desc').value = evt.desc;
+            modal.querySelector('#btn-delete').style.display = 'block';
+        }
+        modal.style.display = 'flex';
+    }
+    function closeItineraryModal() { document.getElementById('itinerary-modal').style.display = 'none'; }
+    function saveEvent() {
+        const newEvt = {
+            time: document.getElementById('inp-time').value, type: document.getElementById('inp-type').value,
+            title: document.getElementById('inp-title').value, link: document.getElementById('inp-link').value,
+            mapUrl: document.getElementById('inp-map').value, cost: document.getElementById('inp-cost').value,
+            desc: document.getElementById('inp-desc').value
+        };
+        if (editEventIdx === null) { tripData[currentDayIdx].events.push(newEvt); } 
+        else { tripData[currentDayIdx].events[editEventIdx] = newEvt; }
+        saveData(); renderEvents(); closeItineraryModal();
+    }
+    function deleteEvent() { if (confirm("確定刪除嗎？")) { tripData[currentDayIdx].events.splice(editEventIdx, 1); saveData(); renderEvents(); closeItineraryModal(); }}
+
+    function openBudgetModal(idx) {
+        const modal = document.getElementById('budget-modal');
+        editingBudgetIdx = idx;
+        if (idx === null) {
+            document.getElementById('budget-modal-title').innerText = "新增支出";
+            document.getElementById('b-date').value = ""; document.getElementById('b-type').value = "food";
+            document.getElementById('b-title').value = ""; document.getElementById('b-cost').value = "";
+            document.getElementById('b-btn-delete').style.display = 'none';
+        } else {
+            document.getElementById('budget-modal-title').innerText = "編輯/刪除";
+            const item = budgetData[currentBudgetPerson][idx];
+            document.getElementById('b-date').value = item.date; document.getElementById('b-type').value = item.type;
+            document.getElementById('b-title').value = item.title; document.getElementById('b-cost').value = item.cost;
+            document.getElementById('b-btn-delete').style.display = 'block';
+        }
+        modal.style.display = 'flex';
+    }
+    function closeBudgetModal() { document.getElementById('budget-modal').style.display = 'none'; }
+    function saveBudgetItem() {
+        const newItem = {
+            date: document.getElementById('b-date').value, type: document.getElementById('b-type').value,
+            title: document.getElementById('b-title').value, cost: document.getElementById('b-cost').value
+        };
+        if(!budgetData[currentBudgetPerson]) budgetData[currentBudgetPerson] = [];
+        if(editingBudgetIdx === null) { budgetData[currentBudgetPerson].push(newItem); } 
+        else { budgetData[currentBudgetPerson][editingBudgetIdx] = newItem; }
+        saveBudget(); renderBudgetList(); closeBudgetModal();
+    }
+    function deleteBudgetItem() {
+        if(confirm("確定刪除此筆記帳？")) {
+            budgetData[currentBudgetPerson].splice(editingBudgetIdx, 1);
+            saveBudget(); renderBudgetList(); closeBudgetModal();
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
