@@ -8,25 +8,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <style>
-        /* --- 保持原本的 CSS 完全不變 --- */
-        :root { --bg-color: #F9F9F7; --card-bg: #FFFFFF; --text-main: #333333; --text-sub: #888888; --radius: 12px; --shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        /* --- 1. 全局設定 --- */
+        :root {
+            --bg-color: #F9F9F7;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-sub: #888888;
+            --radius: 12px;
+            --shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; select: none; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #eee; margin: 0; padding: 0; display: flex; justify-content: center; color: var(--text-main); }
-        #app { width: 100%; max-width: 480px; min-height: 100vh; background: var(--bg-color); position: relative; padding-bottom: 80px; }
-        header { background: rgba(255,255,255,0.95); padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #eee; margin: 0; padding: 0;
+            display: flex; justify-content: center; color: var(--text-main);
+        }
+
+        #app {
+            width: 100%; max-width: 480px; min-height: 100vh;
+            background: var(--bg-color); position: relative; padding-bottom: 80px;
+        }
+
+        /* --- 2. Header --- */
+        header {
+            background: rgba(255,255,255,0.95); padding: 15px 20px;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+            display: flex; align-items: center; justify-content: space-between; height: 60px;
+        }
         h1 { margin: 0; font-size: 18px; font-weight: bold; }
         .back-btn { font-size: 20px; color: var(--text-main); cursor: pointer; border: none; background: none; display: none; }
+
+        /* --- 3. Dashboard --- */
         #view-dashboard { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; animation: fadeIn 0.3s; }
-        .day-block { background: var(--card-bg); padding: 15px 10px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; position: relative; }
+        .day-block {
+            background: var(--card-bg); padding: 15px 10px; border-radius: var(--radius);
+            box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; position: relative;
+        }
         .day-block:active { transform: scale(0.95); }
         .day-num { font-size: 12px; color: var(--text-sub); font-weight: bold; }
         .day-date { font-size: 16px; font-weight: bold; margin: 4px 0; color: #333; }
         .day-loc { font-size: 12px; color: #666; margin-bottom: 6px; }
-        .day-weather { display: inline-block; background: #F0F8FF; color: #56CCF2; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; border: 1px solid #E0F0FF; }
+        .day-weather {
+            display: inline-block; background: #F0F8FF; color: #56CCF2;
+            padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; border: 1px solid #E0F0FF;
+        }
+
+        /* --- 4. Detail View --- */
         #view-detail { display: none; padding: 15px; animation: slideIn 0.3s; }
-        .card { background: #fff; margin-bottom: 15px; padding: 15px; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 5px solid #ccc; position: relative; }
+        .card {
+            background: #fff; margin-bottom: 15px; padding: 15px;
+            border-radius: var(--radius); box-shadow: var(--shadow);
+            border-left: 5px solid #ccc; position: relative;
+            /* 讓卡片在拖曳時更平滑 */
+            touch-action: none; 
+        }
         .type-spot { border-left-color: #F2C94C; } .type-food { border-left-color: #EB5757; }
         .type-transport { border-left-color: #56CCF2; background: #F0FAFF; } .type-stay { border-left-color: #6FCF97; }
+
         .card-row { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-time { font-size: 14px; font-weight: bold; color: #555; width: 50px; }
         .card-content { flex: 1; }
@@ -36,13 +77,29 @@
         .action-btns { display: flex; gap: 8px; margin-left: 10px; align-items: flex-start;}
         .icon-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #eee; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; }
         .btn-link { color: #27AE60; border-color: #D5F5E3; background: #EAFAF1; }
+
+        /* Sortable 樣式優化 */
+        .sortable-ghost { opacity: 0.4; background: #eee; border: 2px dashed #999; }
+        .sortable-chosen { background: #fdfdfd; box-shadow: 0 8px 20px rgba(0,0,0,0.15); transform: scale(1.02); z-index: 10; }
+        .sortable-drag { opacity: 1; }
+
+        /* --- 5. Tool Styles --- */
         #view-tools { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .tool-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .tool-block { background: #fff; padding: 25px 15px; border-radius: 16px; box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .tool-block {
+            background: #fff; padding: 25px 15px; border-radius: 16px; box-shadow: var(--shadow);
+            text-align: center; cursor: pointer; transition: transform 0.1s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+        }
         .tool-block:active { transform: scale(0.96); }
-        .tool-icon-box { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; }
+        .tool-icon-box {
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 5px;
+        }
         .tool-title { font-weight: bold; color: #333; font-size: 15px; }
         .tool-subview { display: none; animation: slideIn 0.3s; }
+
+        /* Flight & Train Styles */
         .flight-card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; border-left: 6px solid #56CCF2; cursor: pointer; }
         .flight-number { font-size: 28px; font-weight: 800; color: #333; margin: 5px 0; }
         .flight-route { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: bold; color: #555; }
@@ -53,31 +110,83 @@
         .seat-card { background: #fff; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; overflow: hidden; }
         .seat-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
         .seat-info { padding: 15px; }
+        .seat-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+
+        /* --- 6. Budget Notebook --- */
         .budget-person-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .budget-person-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .avatar-circle { width: 40px; height: 40px; background: #333; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-        #budget-notebook { background-color: #fff; background-image: linear-gradient(#e1e1e1 1px, transparent 1px); background-size: 100% 50px;  min-height: 80vh; padding-bottom: 80px; position: relative; }
-        .notebook-header { background: #f8f8f8; padding: 10px 15px; border-bottom: 2px solid #ccc; font-size: 12px; font-weight: bold; color: #888; display: flex; }
-        .nb-row { height: 50px; display: flex; align-items: center; padding: 0 15px; font-size: 15px; color: #333; user-select: none; -webkit-user-select: none; }
+        .budget-person-card {
+            background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--shadow);
+            display: flex; align-items: center; gap: 15px; cursor: pointer;
+        }
+        .avatar-circle {
+            width: 40px; height: 40px; background: #333; color: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;
+        }
+        
+        #budget-notebook {
+            background-color: #fff;
+            background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
+            background-size: 100% 50px; 
+            min-height: 80vh;
+            padding-bottom: 80px;
+            position: relative;
+        }
+        .notebook-header {
+            background: #f8f8f8; padding: 10px 15px; border-bottom: 2px solid #ccc;
+            font-size: 12px; font-weight: bold; color: #888; display: flex;
+        }
+        .nb-row {
+            height: 50px; display: flex; align-items: center; padding: 0 15px;
+            font-size: 15px; color: #333; user-select: none; -webkit-user-select: none;
+        }
         .nb-row:active { background-color: rgba(0,0,0,0.05); }
+        
         .col-date { width: 50px; font-size: 13px; color: #888; }
         .col-type { width: 40px; font-size: 18px; text-align: center; margin-right: 10px;}
         .col-content { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
         .col-cost { width: 80px; text-align: right; font-weight: bold; color: #B07C3D; font-family: monospace; font-size: 16px;}
-        .budget-total-bar { position: fixed; bottom: 60px; left: 0; width: 100%; background: #333; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 90; }
-        .fab { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; background: #333; color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 150; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(3px); }
-        .modal-box { background: #fff; width: 85%; max-width: 400px; padding: 20px; border-radius: 12px; animation: popUp 0.2s; }
+        
+        .budget-total-bar {
+            position: fixed; bottom: 60px; left: 0; width: 100%;
+            background: #333; color: #fff; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 90;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px;
+            background: #333; color: #fff; border-radius: 50%; display: none;
+            align-items: center; justify-content: center; font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 150;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(3px);
+        }
+        .modal-box {
+            background: #fff; width: 85%; max-width: 400px; padding: 20px;
+            border-radius: 12px; animation: popUp 0.2s;
+        }
         .form-group { margin-bottom: 12px; }
         .form-input, .form-select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background:#fff;}
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-save { background: #333; color: #fff; }
         .btn-del { background: #fff; border: 1px solid #EB5757; color: #EB5757; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 480px;
+            background: #fff; border-top: 1px solid #eee;
+            display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
+        }
         .nav-item { text-align: center; color: #ccc; font-size: 10px; cursor: pointer; }
         .nav-item.active { color: #333; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes popUp { from { transform: scale(0.9); } to { transform: scale(1); } }
@@ -187,16 +296,15 @@
     import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // 🔴 請在這裡填入你的 Firebase 設定 (從 Firebase Console -> Project Settings -> General -> Your apps 複製)
-    
     const firebaseConfig = {
-  apiKey: "AIzaSyDGNRpSoWB9VHKjzIk9qsMEB-kzRvFJr3Y",
-  authDomain: "coco-525eb.firebaseapp.com",
-  projectId: "coco-525eb",
-  storageBucket: "coco-525eb.firebasestorage.app",
-  messagingSenderId: "472898703212",
-  appId: "1:472898703212:web:0bc5fa2751ab45ad68ed49",
-  measurementId: "G-F0VSKJCSTT"
-};
+      apiKey: "AIzaSyDGNRpSoWB9VHKjzIk9qsMEB-kzRvFJr3Y",
+      authDomain: "coco-525eb.firebaseapp.com",
+      projectId: "coco-525eb",
+      storageBucket: "coco-525eb.firebasestorage.app",
+      messagingSenderId: "472898703212",
+      appId: "1:472898703212:web:0bc5fa2751ab45ad68ed49",
+      measurementId: "G-F0VSKJCSTT"
+    };
 
     // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
@@ -208,68 +316,67 @@
     const defaultTrip = [
         { date: "Day 1", fullDate: "1/19 (日)", loc: "抵達熊本", weather: "☁️ 7°C", events: [
             { time: "14:30", type: "transport", title: "飛機出發 (CI194)", cost: "", desc: "17:30 抵達熊本機場" },
-            { time: "18:00", type: "transport", title: "機場巴士", cost: "¥1200", link: "https://www.sankobus.jp/bus/airport/", desc: "前往熊本櫻町巴士總站 (19:00抵達)" },
-            { time: "19:30", type: "food", title: "勝烈亭 豬排", cost: "¥2500", desc: "熊本名店，就在商店街附近" },
-            { time: "21:00", type: "spot", title: "熊本城 櫻之馬場", cost: "", desc: "就在櫻町旁邊，看夜景" },
+            { time: "19:00", type: "transport", title: "機場直達巴士", cost: "¥1200", link: "https://www.sankobus.jp/bus/airport/", desc: "19:42 抵達櫻町/熊本市內" },
+            { time: "晚上", type: "spot", title: "熊本周遊券", cost: "", desc: "不是空港直達巴士的話不能用" },
             { time: "住宿", type: "stay", title: "SUPER HOTEL Kumamoto", cost: "¥3310", link: "https://www.superhotel.co.jp/", desc: "熊本車站正對面，含溫泉與早餐" }
         ]},
         { date: "Day 2", fullDate: "1/20 (一)", loc: "別府", weather: "⛅ 8°C", events: [
-            { time: "10:03", type: "transport", title: "九州新幹線", cost: "", desc: "熊本 -> 博多 -> 別府 (約3小時)" },
-            { time: "13:00", type: "food", title: "別府冷麵 / 天丼", cost: "¥1500", desc: "車站附近午餐" },
-            { time: "14:30", type: "spot", title: "別府地獄巡禮", cost: "¥2000", link: "http://www.beppu-jigoku.com/", desc: "海地獄、血池地獄等 (使用巴士一日券)" },
-            { time: "17:00", type: "spot", title: "葫蘆溫泉 (Hyotan Onsen)", cost: "¥860", link: "https://www.hyotan-onsen.com/", desc: "米其林三星溫泉，砂湯體驗" },
-            { time: "19:00", type: "spot", title: "湯煙展望台", cost: "", desc: "看別府夜景與湯煙" },
+            { time: "10:03", type: "transport", title: "九州新幹線 -> 別府", cost: "", desc: "10:45 抵達" },
+            { time: "11:00", type: "transport", title: "Sonic 音速號", cost: "", desc: "12:50 抵達別府" },
+            { time: "午餐", type: "food", title: "別府當地午餐", cost: "", desc: "" },
+            { time: "交通", type: "transport", title: "龜之井巴士一日券", cost: "", link: "https://kamenoibus.com/guruspamp/guruspa/01/index.html", desc: "My Beppu Free" },
+            { time: "下午", type: "spot", title: "別府地獄巡禮", cost: "", link: "http://www.beppu-jigoku.com/", desc: "Beppu Jigoku" },
+            { time: "傍晚", type: "spot", title: "葫蘆溫泉 (Hyotan Onsen)", cost: "", desc: "砂湯、日歸溫泉" },
+            { time: "晚上", type: "spot", title: "湯煙展望台", cost: "", desc: "Yukemuri Observation Deck" },
             { time: "住宿", type: "stay", title: "GRAND BASE Beppueki", cost: "¥3800", desc: "別府車站附近" }
         ]},
         { date: "Day 3", fullDate: "1/21 (二)", loc: "福岡博多", weather: "☀️ 9°C", events: [
-            { time: "10:00", type: "transport", title: "Sonic 音速號", cost: "", desc: "別府 -> 博多 (約2小時)" },
-            { time: "12:30", type: "spot", title: "住吉神社", cost: "", desc: "博多最古老神社" },
-            { time: "14:00", type: "spot", title: "櫛田神社", cost: "", desc: "博多總鎮守，看山笠" },
-            { time: "16:00", type: "spot", title: "天神地下街", cost: "", desc: "逛街購物" },
-            { time: "18:00", type: "food", title: "博多牛腸鍋", cost: "¥3000", desc: "福岡必吃美食" },
-            { time: "20:00", type: "spot", title: "博多運河城", cost: "", desc: "看水舞秀" },
-            { time: "住宿", type: "stay", title: "alfacio riverside stay hakata", cost: "¥2400", desc: "中洲川端附近" }
+            { time: "上午", type: "transport", title: "Sonic 音速號 -> 博多", cost: "", desc: "前往福岡" },
+            { time: "下午", type: "spot", title: "住吉神社", cost: "", desc: "Sumiyoshi Shrine" },
+            { time: "下午", type: "spot", title: "櫛田神社", cost: "", desc: "Kushida Shrine" },
+            { time: "晚餐", type: "food", title: "博多牛腸鍋", cost: "", desc: "Motsunabe" },
+            { time: "晚上", type: "spot", title: "天神地下街", cost: "", desc: "營業至 20:00" },
+            { time: "晚上", type: "spot", title: "博多運河城", cost: "", desc: "營業至 21:00" },
+            { time: "住宿", type: "stay", title: "alfacio riverside stay hakata", cost: "¥2400", desc: "中洲川端附近 (連住三晚)" }
         ]},
         { date: "Day 4", fullDate: "1/22 (三)", loc: "長崎一日遊", weather: "🌧️ 6°C", events: [
-            { time: "09:00", type: "transport", title: "接力海鷗號 + 新幹線", cost: "", desc: "博多 -> 武雄溫泉 -> 長崎 (約1.5小時)" },
-            { time: "11:00", type: "spot", title: "出島 Dejima", cost: "¥520", desc: "荷蘭商館遺跡" },
-            { time: "12:30", type: "food", title: "長崎什錦麵 / 角煮", cost: "¥1200", desc: "中華街附近" },
-            { time: "14:00", type: "spot", title: "哥拉巴園 & 大浦天主堂", cost: "¥620", desc: "蝴蝶夫人故居" },
-            { time: "16:00", type: "spot", title: "原爆資料館 & 平和公園", cost: "¥200", desc: "歷史巡禮" },
-            { time: "17:30", type: "spot", title: "山王神社 二之鳥居", cost: "", desc: "單腳鳥居" },
-            { time: "19:00", type: "spot", title: "稻佐山夜景", cost: "¥1250", link: "https://www.inasayama.com/", desc: "世界新三大夜景 (纜車)" },
-            { time: "21:30", type: "transport", title: "返回博多", cost: "", desc: "搭乘末班新幹線回福岡" }
+            { time: "上午", type: "transport", title: "接力海鷗號 -> 長崎", cost: "", desc: "約 1h40min" },
+            { time: "交通", type: "transport", title: "長崎電車一日乘車券", cost: "", desc: "路面電車" },
+            { time: "景點", type: "spot", title: "出島 Dejima", cost: "¥520", desc: "荷蘭商館遺跡" },
+            { time: "景點", type: "spot", title: "哥拉巴園 & 大浦天主堂", cost: "¥620", desc: "Glover Garden" },
+            { time: "景點", type: "spot", title: "長崎原爆資料館", cost: "¥200", desc: "和平公園" },
+            { time: "景點", type: "spot", title: "浦上天主堂", cost: "", desc: "Urakami Cathedral" },
+            { time: "景點", type: "spot", title: "山王神社 二之鳥居", cost: "", desc: "單腳鳥居" },
+            { time: "晚上", type: "spot", title: "稻佐山夜景", cost: "¥1250", link: "https://www.inasayama.com/", desc: "JR長崎站有免費接駁巴士(需預約)" },
+            { time: "回程", type: "transport", title: "西九州新幹線 -> 博多", cost: "", desc: "返回福岡" },
+            { time: "住宿", type: "stay", title: "alfacio riverside stay hakata", cost: "¥2400", desc: "續住" }
         ]},
         { date: "Day 5", fullDate: "1/23 (四)", loc: "福岡自由", weather: "☁️ 8°C", events: [
-            { time: "10:00", type: "spot", title: "太宰府天滿宮", cost: "", desc: "求學業，吃梅枝餅" },
-            { time: "14:00", type: "spot", title: "柳川遊船 (選配)", cost: "¥1500", desc: "水都柳川，吃鰻魚飯" },
-            { time: "17:00", type: "spot", title: "福岡塔 / 巨蛋", cost: "¥800", desc: "海濱百道區域" },
-            { time: "19:30", type: "food", title: "博多屋台", cost: "¥2000", desc: "中洲/天神屋台體驗" },
+            { time: "全天", type: "spot", title: "自由活動", cost: "", desc: "博多集合" },
+            { time: "晚餐", type: "food", title: "晚餐", cost: "", desc: "" },
             { time: "住宿", type: "stay", title: "alfacio riverside stay hakata", cost: "¥2400", desc: "續住" }
         ]},
         { date: "Day 6", fullDate: "1/24 (五)", loc: "福岡/熊本", weather: "☀️ 10°C", events: [
-            { time: "11:00", type: "transport", title: "新幹線 -> 熊本", cost: "", desc: "移動日，返回熊本 (約40分)" },
-            { time: "13:00", type: "food", title: "熊本拉麵 (黑亭)", cost: "¥1000", desc: "蒜味焦香拉麵" },
-            { time: "14:30", type: "spot", title: "下通/上通 商店街", cost: "", desc: "購物採買伴手禮" },
-            { time: "16:00", type: "spot", title: "熊本熊部長辦公室", cost: "", link: "https://www.kumamon-sq.jp/", desc: "Kumamon Square (可能有表演)" },
-            { time: "19:00", type: "food", title: "馬肉料理 (選配)", cost: "¥4000", desc: "熊本特色料理" },
-            { time: "住宿", type: "stay", title: "fav KUMAMOTO", cost: "¥4000", link: "https://fav-hotels.com/hotels/kumamoto/", desc: "新型公寓式酒店" }
+            { time: "上午", type: "spot", title: "自由活動", cost: "", desc: "建議: 長崎/軍艦島/豪斯登堡/島原" },
+            { time: "16:00", type: "transport", title: "九州新幹線 -> 熊本", cost: "", desc: "16:48 抵達熊本" },
+            { time: "交通", type: "transport", title: "熊本市電", cost: "", desc: "" },
+            { time: "景點", type: "spot", title: "熊本城 & 櫻之馬場", cost: "", desc: "Kumamoto Castle & Josaien" },
+            { time: "住宿", type: "stay", title: "fav KUMAMOTO", cost: "¥4000", link: "https://fav-hotels.com/hotels/kumamoto/", desc: "兩雙兩單床" }
         ]},
         { date: "Day 7", fullDate: "1/25 (六)", loc: "阿蘇自駕", weather: "⛅ 4°C", events: [
-            { time: "09:00", type: "transport", title: "租車自駕出發", cost: "¥2000", desc: "前往阿蘇" },
-            { time: "10:30", type: "spot", title: "草千里之濱", cost: "", link: "https://kumamoto.guide/spots/detail/205", desc: "大草原與烏帽子岳" },
-            { time: "11:30", type: "spot", title: "阿蘇中岳火山口", cost: "¥800", link: "http://www.aso.ne.jp/~volcano/", desc: "視氣體濃度開放" },
-            { time: "13:00", type: "food", title: "阿蘇赤牛丼", cost: "¥1800", desc: "Imakin食堂或周邊" },
-            { time: "14:30", type: "spot", title: "大觀峰", cost: "", desc: "360度阿蘇五岳絕景" },
-            { time: "16:00", type: "spot", title: "上色見熊野座神社", cost: "", desc: "神秘的神社 (視時間)" },
-            { time: "19:00", type: "transport", title: "返回熊本還車", cost: "", desc: "加油並還車" },
+            { time: "全天", type: "transport", title: "阿蘇租車自駕", cost: "", desc: "" },
+            { time: "景點", type: "spot", title: "草千里展望所", cost: "", desc: "Kusasenri Observatory" },
+            { time: "景點", type: "spot", title: "阿蘇中岳火山口", cost: "¥800", link: "http://www.aso.ne.jp/~volcano/", desc: "視氣體濃度開放" },
+            { time: "午餐", type: "food", title: "阿蘇赤牛丼", cost: "¥1800", desc: "Aso Red Beef Bowl" },
+            { time: "景點", type: "spot", title: "道之驛 阿蘇", cost: "", desc: "Aso Roadside Station" },
+            { time: "景點", type: "spot", title: "大觀峰", cost: "", desc: "Daikanbo" },
+            { time: "景點", type: "spot", title: "上色見熊野座神社", cost: "", desc: "視天氣決定" },
             { time: "住宿", type: "stay", title: "fav KUMAMOTO", cost: "¥4000", desc: "續住" }
         ]},
         { date: "Day 8", fullDate: "1/26 (日)", loc: "回程", weather: "☀️ 11°C", events: [
-             { time: "10:00", type: "spot", title: "水前寺成趣園", cost: "¥400", desc: "日式庭園" },
-             { time: "12:00", type: "food", title: "最後午餐", cost: "", desc: "自由選擇" },
-             { time: "15:30", type: "transport", title: "櫻町巴士總站", cost: "", desc: "搭乘機場巴士" },
-             { time: "16:30", type: "transport", title: "抵達熊本機場", cost: "", desc: "辦理登機與免稅店" },
+             { time: "上午", type: "spot", title: "熊本熊部長辦公室", cost: "", link: "https://www.kumamon-sq.jp/", desc: "Kumamon Square" },
+             { time: "景點", type: "spot", title: "水前寺成趣園", cost: "", desc: "" },
+             { time: "下午", type: "transport", title: "櫻町 -> 機場巴士", cost: "", desc: "" },
              { time: "18:30", type: "transport", title: "飛機回程 (CI195)", cost: "", desc: "20:05 抵達台北" }
         ]}
     ];
@@ -421,11 +528,22 @@
             });
         }
         list.innerHTML = html;
-        new Sortable(list, { animation: 150, delay: 200, ghostClass: 'sortable-ghost', onEnd: function (evt) {
-            const movedItem = tripData[currentDayIdx].events.splice(evt.oldIndex, 1)[0];
-            tripData[currentDayIdx].events.splice(evt.newIndex, 0, movedItem); 
-            saveToCloud();
-        }});
+        
+        // --- 排序設定更新 (長按拖曳) ---
+        new Sortable(list, { 
+            animation: 150, 
+            delay: 300,            // 長按 300ms 觸發
+            delayOnTouchOnly: true,// 僅觸控裝置需長按
+            touchStartThreshold: 5,// 手指移動 5px 才算拖曳
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            onEnd: function (evt) {
+                const movedItem = tripData[currentDayIdx].events.splice(evt.oldIndex, 1)[0];
+                tripData[currentDayIdx].events.splice(evt.newIndex, 0, movedItem); 
+                saveToCloud();
+            }
+        });
     }
 
     // --- Tools ---
